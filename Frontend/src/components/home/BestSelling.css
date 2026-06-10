@@ -1,0 +1,22 @@
+.best-selling {
+  padding-bottom: 60px;
+}
+
+.best-selling__grid {
+  display: flex;
+  gap: 30px;
+  overflow-x: auto;
+  padding-bottom: 20px;
+  scrollbar-width: none;
+}
+
+.best-selling__grid::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .best-selling__grid {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

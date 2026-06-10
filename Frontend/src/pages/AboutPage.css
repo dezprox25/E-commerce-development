@@ -1,0 +1,220 @@
+.about-page {
+  padding-bottom: 0;
+}
+
+.about-page__story {
+  display: flex;
+  align-items: center;
+  gap: 135px;
+  margin: 40px 0 140px;
+}
+
+.about-page__story-content {
+  flex: 1;
+  max-width: 525px;
+}
+
+.about-page__title {
+  font-size: 54px;
+  font-weight: var(--weight-semibold);
+  margin-bottom: 40px;
+  font-family: var(--font-secondary);
+  letter-spacing: 3.24px;
+}
+
+.about-page__text {
+  font-size: var(--text-base);
+  line-height: 26px;
+  margin-bottom: 24px;
+}
+
+.about-page__story-image {
+  width: 705px;
+  height: 609px;
+  background-color: #EB84B0;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.about-page__stats {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 140px;
+}
+
+.stat-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-primary);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.stat-card:hover {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-white);
+  box-shadow: 0px 1px 13px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card__icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background-color: var(--border-medium);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  transition: background-color var(--transition-fast);
+}
+
+.stat-card:hover .stat-card__icon-wrapper {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.stat-card__icon {
+  width: 58px;
+  height: 58px;
+  background-color: var(--bg-dark);
+  color: var(--text-white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.stat-card:hover .stat-card__icon {
+  background-color: var(--text-white);
+  color: var(--text-primary);
+}
+
+.stat-card__value {
+  font-size: 32px;
+  font-weight: var(--weight-bold);
+  margin-bottom: 12px;
+  font-family: var(--font-secondary);
+  letter-spacing: 1.28px;
+}
+
+.stat-card__label {
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+}
+
+.about-page__team {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.team-card {
+  flex: 1;
+}
+
+.team-card__image {
+  width: 100%;
+  height: 430px;
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.team-card__name {
+  font-size: 32px;
+  font-weight: var(--weight-medium);
+  margin-bottom: 8px;
+  font-family: var(--font-secondary);
+  letter-spacing: 1.28px;
+}
+
+.team-card__role {
+  font-size: var(--text-base);
+  margin-bottom: 16px;
+}
+
+.team-card__social {
+  display: flex;
+  gap: 16px;
+}
+
+.about-page__dots {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 140px;
+}
+
+.about-page__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--border-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.about-page__dot--active {
+  background-color: var(--primary);
+  border: 2px solid var(--text-white);
+  width: 14px;
+  height: 14px;
+  outline: 2px solid var(--primary);
+}
+
+@media (max-width: 1023px) {
+  .about-page__story {
+    flex-direction: column;
+    gap: 40px;
+    margin-bottom: 80px;
+  }
+  
+  .about-page__story-image {
+    width: 100%;
+    height: 400px;
+  }
+  
+  .about-page__stats {
+    flex-wrap: wrap;
+    margin-bottom: 80px;
+  }
+  
+  .stat-card {
+    min-width: calc(50% - 15px);
+  }
+  
+  .about-page__team {
+    flex-wrap: wrap;
+  }
+  
+  .team-card {
+    min-width: calc(50% - 15px);
+  }
+}
+
+@media (max-width: 767px) {
+  .about-page__title {
+    font-size: 32px;
+  }
+  
+  .stat-card {
+    min-width: 100%;
+  }
+  
+  .team-card {
+    min-width: 100%;
+  }
+}

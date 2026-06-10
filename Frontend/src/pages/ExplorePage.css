@@ -1,0 +1,57 @@
+.explore-page__categories {
+  margin-bottom: 60px;
+}
+
+.explore-page__title {
+  font-size: 36px;
+  font-family: var(--font-secondary);
+  margin-bottom: 16px;
+}
+
+.explore-page__subtitle {
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+}
+
+.explore-page__category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 30px;
+}
+
+.explore-page__products-title {
+  font-size: 28px;
+  font-family: var(--font-secondary);
+  margin-bottom: 40px;
+  text-transform: capitalize;
+}
+
+/* Common pagination styles extracted from AllProductsPage */
+.pagination-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-medium);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(.disabled) {
+  background-color: var(--bg-secondary);
+}
+
+.pagination-btn.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.pagination-btn.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
