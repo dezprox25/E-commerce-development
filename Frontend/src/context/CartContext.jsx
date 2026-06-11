@@ -1,45 +1,143 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import apiFetch from '../utils/api';
 
 const CartContext = createContext();
 
+const GUEST_CART_KEY = 'guest_cart';
+
+/**
+ * Read the guest cart from localStorage.
+ * Returns an array of product objects with quantity.
+ */
+function getGuestCart() {
+  try {
+    const saved = localStorage.getItem(GUEST_CART_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Write the guest cart to localStorage.
+ */
+function saveGuestCart(items) {
+  localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
+}
+
+/**
+ * Clear the guest cart from localStorage.
+ */
+function clearGuestCart() {
+  localStorage.removeItem(GUEST_CART_KEY);
+}
+
 export function CartProvider({ children }) {
   const { isAuthenticated } = useAuth();
+  const prevAuthRef = useRef(isAuthenticated);
   
-  const [cartItems, setCartItems] = useState(() => {
-    const saved = localStorage.getItem('cart');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Load cart from backend if authenticated
+  // -------------------------------------------------------
+  // Handle auth state transitions (login / logout)
+  // -------------------------------------------------------
   useEffect(() => {
-    if (isAuthenticated) {
-      const fetchCart = async () => {
-        try {
-          const data = await apiFetch('/cart');
-          // Map backend cart format {id, quantity, product: {...}} to frontend format {...product, cartItemId: id, quantity}
-          const formattedCart = data.map(item => ({
-            ...item.product,
-            cartItemId: item.id,
-            quantity: item.quantity
-          }));
-          setCartItems(formattedCart);
-        } catch (error) {
-          console.error('Failed to fetch cart:', error);
-        }
-      };
-      fetchCart();
+    const prevAuth = prevAuthRef.current;
+    prevAuthRef.current = isAuthenticated;
+
+    if (!prevAuth && isAuthenticated) {
+      // --- User just LOGGED IN ---
+      handleLoginMerge();
+    } else if (prevAuth && !isAuthenticated) {
+      // --- User just LOGGED OUT ---
+      // Don't leak user's cart to guest session — start empty
+      setCartItems([]);
+      // Guest cart was already cleared on login, so guest starts fresh
+    } else if (isAuthenticated) {
+      // --- Already authenticated (e.g., page reload) ---
+      fetchBackendCart();
+    } else {
+      // --- Guest (not authenticated, no transition) ---
+      setCartItems(getGuestCart());
     }
   }, [isAuthenticated]);
 
-  // Sync to local storage for guests, or as a backup
+  /**
+   * On login: merge guest cart items into the backend, clear guest cart,
+   * then fetch the full merged cart from backend.
+   */
+  async function handleLoginMerge() {
+    setLoading(true);
+    try {
+      const guestItems = getGuestCart();
+
+      if (guestItems.length > 0) {
+        // Merge guest items into user's backend cart
+        const mergePayload = guestItems.map(item => ({
+          productId: item.id,
+          quantity: item.quantity
+        }));
+
+        const mergedData = await apiFetch('/cart/merge', {
+          method: 'POST',
+          body: JSON.stringify({ items: mergePayload })
+        });
+
+        // Format the merged cart from backend
+        const formattedCart = mergedData.map(item => ({
+          ...item.product,
+          cartItemId: item.id,
+          quantity: item.quantity
+        }));
+        setCartItems(formattedCart);
+      } else {
+        // No guest items — just fetch the existing backend cart
+        await fetchBackendCart();
+      }
+
+      // Clear guest cart after successful merge
+      clearGuestCart();
+    } catch (error) {
+      console.error('Failed to merge carts:', error);
+      // Fallback: just fetch backend cart
+      await fetchBackendCart();
+      clearGuestCart();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /**
+   * Fetch the authenticated user's cart from the backend.
+   */
+  async function fetchBackendCart() {
+    try {
+      const data = await apiFetch('/cart');
+      const formattedCart = data.map(item => ({
+        ...item.product,
+        cartItemId: item.id,
+        quantity: item.quantity
+      }));
+      setCartItems(formattedCart);
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
+    }
+  }
+
+  // -------------------------------------------------------
+  // Sync guest cart to localStorage whenever it changes
+  // -------------------------------------------------------
   useEffect(() => {
     if (!isAuthenticated) {
-      localStorage.setItem('cart', JSON.stringify(cartItems));
+      saveGuestCart(cartItems);
     }
   }, [cartItems, isAuthenticated]);
 
+  // -------------------------------------------------------
+  // Cart Operations
+  // -------------------------------------------------------
   const addToCart = async (product, quantity = 1) => {
     if (isAuthenticated) {
       try {
@@ -59,7 +157,7 @@ export function CartProvider({ children }) {
         console.error('Failed to add to cart:', error);
       }
     } else {
-      // Guest logic
+      // Guest: store locally only
       setCartItems(prev => {
         const existing = prev.find(item => item.id === product.id);
         if (existing) {
@@ -113,13 +211,15 @@ export function CartProvider({ children }) {
     );
   };
 
-  const clearCart = () => {
-    // If backend clearing is needed, would add it here. For checkout it usually deletes after order.
+  const clearCart = async () => {
     setCartItems([]);
+    if (!isAuthenticated) {
+      saveGuestCart([]);
+    }
   };
 
   const cartTotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity, 0
+    (sum, item) => sum + Number(item.price) * item.quantity, 0
   );
 
   const cartCount = cartItems.reduce(
@@ -128,7 +228,7 @@ export function CartProvider({ children }) {
 
   return (
     <CartContext.Provider value={{
-      cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount
+      cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount, loading
     }}>
       {children}
     </CartContext.Provider>

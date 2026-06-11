@@ -68,6 +68,8 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setUser(null);
+    // Clean up legacy cart key from old implementation
+    localStorage.removeItem('cart');
   };
 
   const updateProfile = async (updates) => {

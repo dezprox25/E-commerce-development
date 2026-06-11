@@ -175,18 +175,18 @@ export default function Header() {
               </button>
 
               <div className={`header__dropdown ${dropdownOpen ? 'header__dropdown--open' : ''}`}>
-                <Link to="/account" className="header__dropdown-item" onClick={() => setDropdownOpen(false)}>
+                <Link to="/account?tab=profile" className="header__dropdown-item" onClick={() => setDropdownOpen(false)}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M20 21V19C20 16.79 18.21 15 16 15H8C5.79 15 4 16.79 4 19V21"/><circle cx="12" cy="7" r="4"/></svg>
                   Manage My Account
                 </Link>
-                <Link to="/cart" className="header__dropdown-item" onClick={() => setDropdownOpen(false)}>
+                <Link to="/account?tab=orders" className="header__dropdown-item" onClick={() => setDropdownOpen(false)}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z"/><path d="M3 6H21"/><path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10"/></svg>
                   My Order
                 </Link>
-                <button className="header__dropdown-item" onClick={() => { setDropdownOpen(false); }}>
+                <Link to="/account?tab=cancellations" className="header__dropdown-item" onClick={() => setDropdownOpen(false)}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
                   My Cancellations
-                </button>
+                </Link>
                 <Link to="/wishlist" className="header__dropdown-item" onClick={() => setDropdownOpen(false)}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M11.49 3.17l-1.83 3.7-4.08.59a1 1 0 00-.55 1.7l2.95 2.88-.7 4.07a1 1 0 001.45 1.05L12 15.4l3.64 1.91a1 1 0 001.45-1.05l-.7-4.07 2.95-2.88a1 1 0 00-.55-1.7l-4.08-.59-1.83-3.7a1 1 0 00-1.8 0z"/></svg>
                   My Reviews

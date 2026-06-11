@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
@@ -11,6 +13,7 @@ export default function WishlistPage() {
   const { wishlistItems, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
   const { products } = useProducts();
+  const navigate = useNavigate();
 
   const handleMoveAllToCart = () => {
     wishlistItems.forEach(item => {
@@ -19,7 +22,35 @@ export default function WishlistPage() {
     });
   };
 
-  const justForYouProducts = products.slice(12, 16);
+  const justForYouProducts = useMemo(() => {
+    if (!products || products.length === 0) return [];
+    
+    let recommended = [];
+
+    if (wishlistItems.length > 0) {
+      const wishlistCategorySet = new Set(wishlistItems.map(item => item.category));
+      const wishlistIds = new Set(wishlistItems.map(item => item.id));
+
+      // Filter products by same categories, excluding those already in wishlist
+      recommended = products.filter(p => 
+        wishlistCategorySet.has(p.category) && !wishlistIds.has(p.id)
+      );
+      
+      // Sort by rating (highest first)
+      recommended.sort((a, b) => Number(b.rating) - Number(a.rating));
+    }
+    
+    // If no matching items found or wishlist is empty, fallback to overall top-rated products not in wishlist
+    if (recommended.length === 0) {
+      const wishlistIds = new Set(wishlistItems.map(item => item.id));
+      recommended = products
+        .filter(p => !wishlistIds.has(p.id))
+        .sort((a, b) => Number(b.rating) - Number(a.rating));
+    }
+
+    // Limit to 4 items
+    return recommended.slice(0, 4);
+  }, [products, wishlistItems]);
 
   return (
     <div className="wishlist-page">
@@ -57,7 +88,7 @@ export default function WishlistPage() {
             subtitle="Just For You" 
             title="" 
             rightContent={
-              <Button variant="secondary">See All</Button>
+              <Button variant="secondary" onClick={() => navigate('/products')}>See All</Button>
             } 
           />
           

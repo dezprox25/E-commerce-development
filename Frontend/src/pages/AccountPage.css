@@ -188,3 +188,49 @@
     width: 100%;
   }
 }
+  
+/* Orders UI Styles */  
+.orders-list { display: flex; flex-direction: column; gap: 24px; }  
+.order-card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; background: #fff; }  
+.order-card__header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 12px; margin-bottom: 12px; align-items: center; }  
+.order-card__id { font-weight: bold; margin-right: 12px; }  
+.order-card__date { color: #666; font-size: 0.9rem; }  
+.order-card__status-group { display: flex; align-items: center; gap: 12px; }  
+.order-status { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }  
+.order-status--pending { background: #fff3cd; color: #856404; }  
+.order-status--processing { background: #cce5ff; color: #004085; }  
+.order-status--cancelled { background: #f8d7da; color: #721c24; }  
+.order-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }  
+.order-item:last-child { border-bottom: none; }  
+.order-item__info { display: flex; align-items: center; gap: 16px; }  
+.order-item__img img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }  
+.order-item__info h4 { margin: 0 0 4px 0; font-size: 1rem; }  
+.order-item__info p { margin: 0; color: #666; font-size: 0.9rem; }  
+.order-item__actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }  
+.order-item__price { font-weight: bold; }  
+.order-btn-remove { background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }  
+.order-btn-cancel-all { background: #d32f2f; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }  
+.order-card__footer { display: flex; justify-content: flex-end; align-items: center; padding-top: 16px; margin-top: 12px; border-top: 1px solid #eee; gap: 12px; font-weight: bold; font-size: 1.1rem; }  
+.order-card__total { color: #d32f2f; }  
+.order-item--cancelled { opacity: 0.6; }  
+.item-status-badge { background: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 12px; font-size: 0.75rem; margin-top: 4px; display: inline-block; } 
+  
+/* Liked Products UI Styles */  
+.liked-products-list { display: flex; flex-direction: column; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff; }  
+.liked-product-card { display: flex; align-items: flex-start; padding: 24px; border-bottom: 1px solid #f0f0f0; position: relative; }  
+.liked-product-card:last-child { border-bottom: none; }  
+.liked-product-image-container { flex-shrink: 0; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin-right: 24px; }  
+.liked-product-image { max-width: 100%%; max-height: 100%%; object-fit: contain; }  
+.liked-product-image-placeholder { width: 100%%; height: 100%%; background: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #999; }  
+.liked-product-details { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }  
+.liked-product-title { font-size: 16px; color: #212121; text-decoration: none; font-weight: 500; margin-bottom: 4px; }  
+.liked-product-title:hover { color: #2874F0; }  
+.liked-product-badge { margin-bottom: 8px; }  
+.liked-product-pricing { display: flex; align-items: baseline; gap: 12px; }  
+.liked-product-price { font-size: 24px; font-weight: bold; color: #212121; }  
+.liked-product-original-price { font-size: 14px; color: #878787; text-decoration: line-through; }  
+.liked-product-discount { font-size: 14px; color: #388E3C; font-weight: bold; letter-spacing: 0.5px; }  
+.liked-product-delete-btn { background: none; border: none; cursor: pointer; padding: 8px; border-radius: 50%%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; position: absolute; right: 24px; top: 24px; }  
+.liked-product-delete-btn:hover { background: #ffebee; }  
+.liked-product-delete-btn:hover svg path { stroke: #d32f2f; }  
+.liked-products-empty { padding: 40px; text-align: center; font-size: 18px; color: #666; background: #fff; border: 1px solid #eee; border-radius: 8px; } 

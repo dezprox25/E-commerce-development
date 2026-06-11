@@ -7,10 +7,7 @@ const WishlistContext = createContext();
 export function WishlistProvider({ children }) {
   const { isAuthenticated } = useAuth();
 
-  const [wishlistItems, setWishlistItems] = useState(() => {
-    const saved = localStorage.getItem('wishlist');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [wishlistItems, setWishlistItems] = useState([]);
 
   // Load wishlist from backend if authenticated
   useEffect(() => {
@@ -29,36 +26,29 @@ export function WishlistProvider({ children }) {
         }
       };
       fetchWishlist();
+    } else {
+      setWishlistItems([]);
     }
   }, [isAuthenticated]);
 
-  // Sync to local storage for guests
-  useEffect(() => {
-    if (!isAuthenticated) {
-      localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
-    }
-  }, [wishlistItems, isAuthenticated]);
-
   const addToWishlist = async (product) => {
-    if (isAuthenticated) {
-      try {
-        const item = await apiFetch('/wishlist', {
-          method: 'POST',
-          body: JSON.stringify({ productId: product.id })
-        });
-        
-        setWishlistItems(prev => {
-          if (prev.find(p => p.id === product.id)) return prev;
-          return [...prev, { ...item.product, wishlistItemId: item.id }];
-        });
-      } catch (error) {
-        console.error('Failed to add to wishlist:', error);
-      }
-    } else {
-      setWishlistItems(prev => {
-        if (prev.find(item => item.id === product.id)) return prev;
-        return [...prev, product];
+    if (!isAuthenticated) {
+      alert('Please log in to add items to your wishlist.');
+      return;
+    }
+
+    try {
+      const item = await apiFetch('/wishlist', {
+        method: 'POST',
+        body: JSON.stringify({ productId: product.id })
       });
+      
+      setWishlistItems(prev => {
+        if (prev.find(p => p.id === product.id)) return prev;
+        return [...prev, { ...item.product, wishlistItemId: item.id }];
+      });
+    } catch (error) {
+      console.error('Failed to add to wishlist:', error);
     }
   };
 

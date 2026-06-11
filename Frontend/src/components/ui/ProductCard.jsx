@@ -84,13 +84,6 @@ export default function ProductCard({
           <StarRating rating={product.rating} />
           <span className="product-card__rating-count">({product.ratingCount})</span>
         </div>
-        {product.colors && product.colors.length > 0 && (
-          <div className="product-card__colors">
-            {product.colors.map((color, i) => (
-              <span key={i} className="product-card__color" style={{ backgroundColor: color }} />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

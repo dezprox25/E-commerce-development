@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -9,27 +9,96 @@ import './CheckoutPage.css';
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, updateProfile } = useAuth();
   const navigate = useNavigate();
 
-  const [address, setAddress] = useState('');
+  const [billing, setBilling] = useState({
+    firstName: '',
+    lastName: '',
+    companyName: '',
+    streetAddress: '',
+    apartment: '',
+    city: '',
+    phone: '',
+    email: ''
+  });
   const [paymentMethod, setPaymentMethod] = useState('bank');
+  const [saveInfo, setSaveInfo] = useState(false);
+  const [placing, setPlacing] = useState(false);
+
+  // --- Auto-fill billing from user profile when authenticated ---
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadUserProfile();
+    }
+  }, [isAuthenticated]);
+
+  async function loadUserProfile() {
+    try {
+      const profile = await apiFetch('/users/profile');
+
+      setBilling(prev => ({
+        ...prev,
+        firstName: profile.firstName || prev.firstName,
+        lastName: profile.lastName || prev.lastName,
+        email: profile.email || prev.email,
+        phone: profile.phone || prev.phone,
+        streetAddress: profile.streetAddress || prev.streetAddress,
+        apartment: profile.apartment || prev.apartment,
+        city: profile.city || prev.city,
+        companyName: profile.companyName || prev.companyName
+      }));
+    } catch (error) {
+      console.error('Failed to load profile for checkout:', error);
+    }
+  }
+
+  const handleChange = (e) => {
+    setBilling(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const isFormValid = () => {
+    return (
+      billing.firstName.trim() !== '' &&
+      billing.streetAddress.trim() !== '' &&
+      billing.city.trim() !== '' &&
+      billing.phone.trim() !== '' &&
+      billing.email.trim() !== ''
+    );
+  };
   
   const handlePlaceOrder = async () => {
     if (!isAuthenticated) {
       alert("Please login to place an order");
-      navigate('/signup');
+      navigate('/login');
       return;
     }
 
+    if (!isFormValid()) {
+      alert("Please fill in all required fields (Name, Street Address, City, Phone, Email)");
+      return;
+    }
+
+    setPlacing(true);
+
     try {
+      // Build the full shipping address string for the order
+      const fullAddress = [
+        billing.streetAddress,
+        billing.apartment,
+        billing.city
+      ].filter(Boolean).join(', ');
+
       const orderData = {
         orderItems: cartItems.map(item => ({
           productId: item.id,
           quantity: item.quantity,
           price: item.price
         })),
-        shippingAddress: address || 'No address provided',
+        shippingAddress: fullAddress,
         paymentMethod: paymentMethod,
         totalAmount: cartTotal
       };
@@ -39,11 +108,30 @@ export default function CheckoutPage() {
         body: JSON.stringify(orderData)
       });
 
+      // Only save billing address to user profile if the checkbox is ticked
+      if (saveInfo) {
+        try {
+          await updateProfile({
+            firstName: billing.firstName,
+            lastName: billing.lastName,
+            phone: billing.phone,
+            streetAddress: billing.streetAddress,
+            apartment: billing.apartment,
+            city: billing.city,
+            companyName: billing.companyName
+          });
+        } catch (err) {
+          console.error('Failed to save billing info:', err);
+        }
+      }
+
       alert('Order placed successfully!');
       clearCart();
       navigate('/account');
     } catch (error) {
       alert('Failed to place order: ' + error.message);
+    } finally {
+      setPlacing(false);
     }
   };
 
@@ -59,41 +147,104 @@ export default function CheckoutPage() {
           <form className="checkout-page__form" onSubmit={(e) => e.preventDefault()}>
             <div className="checkout-page__form-group">
               <label>First Name<span className="required">*</span></label>
-              <input type="text" className="input" required />
+              <input
+                type="text"
+                className="input"
+                name="firstName"
+                value={billing.firstName}
+                onChange={handleChange}
+                required
+              />
             </div>
             
             <div className="checkout-page__form-group">
+              <label>Last Name</label>
+              <input
+                type="text"
+                className="input"
+                name="lastName"
+                value={billing.lastName}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="checkout-page__form-group">
               <label>Company Name</label>
-              <input type="text" className="input" />
+              <input
+                type="text"
+                className="input"
+                name="companyName"
+                value={billing.companyName}
+                onChange={handleChange}
+              />
             </div>
             
             <div className="checkout-page__form-group">
               <label>Street Address<span className="required">*</span></label>
-              <input type="text" className="input" value={address} onChange={(e) => setAddress(e.target.value)} required />
+              <input
+                type="text"
+                className="input"
+                name="streetAddress"
+                value={billing.streetAddress}
+                onChange={handleChange}
+                required
+              />
             </div>
             
             <div className="checkout-page__form-group">
               <label>Apartment, floor, etc. (optional)</label>
-              <input type="text" className="input" />
+              <input
+                type="text"
+                className="input"
+                name="apartment"
+                value={billing.apartment}
+                onChange={handleChange}
+              />
             </div>
             
             <div className="checkout-page__form-group">
               <label>Town/City<span className="required">*</span></label>
-              <input type="text" className="input" required />
+              <input
+                type="text"
+                className="input"
+                name="city"
+                value={billing.city}
+                onChange={handleChange}
+                required
+              />
             </div>
             
             <div className="checkout-page__form-group">
               <label>Phone Number<span className="required">*</span></label>
-              <input type="tel" className="input" required />
+              <input
+                type="tel"
+                className="input"
+                name="phone"
+                value={billing.phone}
+                onChange={handleChange}
+                required
+              />
             </div>
             
             <div className="checkout-page__form-group">
               <label>Email Address<span className="required">*</span></label>
-              <input type="email" className="input" required />
+              <input
+                type="email"
+                className="input"
+                name="email"
+                value={billing.email}
+                onChange={handleChange}
+                required
+              />
             </div>
             
             <div className="checkout-page__checkbox">
-              <input type="checkbox" id="save-info" />
+              <input
+                type="checkbox"
+                id="save-info"
+                checked={saveInfo}
+                onChange={(e) => setSaveInfo(e.target.checked)}
+              />
               <label htmlFor="save-info">Save this information for faster check-out next time</label>
             </div>
           </form>
@@ -104,7 +255,11 @@ export default function CheckoutPage() {
               {cartItems.map(item => (
                 <div key={item.id} className="checkout-page__item">
                   <div className="checkout-page__item-left">
-                    <div className="checkout-page__item-img">IMG</div>
+                    <div className="checkout-page__item-img">
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.name} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                      ) : 'IMG'}
+                    </div>
                     <span>{item.name}</span>
                   </div>
                   <span>${Number(item.price).toFixed(2)}</span>
@@ -154,7 +309,9 @@ export default function CheckoutPage() {
               <Button>Apply Coupon</Button>
             </div>
             
-            <Button onClick={handlePlaceOrder}>Place Order</Button>
+            <Button onClick={handlePlaceOrder} disabled={placing || !isFormValid()}>
+              {placing ? 'Placing Order...' : 'Place Order'}
+            </Button>
           </div>
         </div>
       </div>
