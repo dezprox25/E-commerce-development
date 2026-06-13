@@ -24,8 +24,31 @@ const createOrder = async (req, res) => {
   }
 
   try {
-    // Create the order and clear the user's cart in a single transaction
-    const [order] = await prisma.$transaction([
+    // 1. Fetch current stock for all requested items
+    const productIds = orderItems.map(item => item.productId);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, stockQuantity: true, name: true }
+    });
+
+    // 2. Validate stock
+    for (const item of orderItems) {
+      const dbProduct = products.find(p => p.id === item.productId);
+      if (!dbProduct) {
+        return res.status(404).json({ message: `Product ${item.productId} not found` });
+      }
+      if (dbProduct.stockQuantity < item.quantity) {
+        return res.status(400).json({ 
+          message: `Insufficient stock for ${dbProduct.name}. Requested: ${item.quantity}, Available: ${dbProduct.stockQuantity}` 
+        });
+      }
+    }
+
+    // 3. Prepare transaction operations
+    const operations = [];
+
+    // Create the order
+    operations.push(
       prisma.order.create({
         data: {
           userId: req.user.id,
@@ -41,12 +64,31 @@ const createOrder = async (req, res) => {
           },
         },
         include: { items: true },
-      }),
-      // Clear user's cart after order is placed
+      })
+    );
+
+    // Clear user's cart
+    operations.push(
       prisma.cartItem.deleteMany({
         where: { userId: req.user.id },
-      }),
-    ]);
+      })
+    );
+
+    // Decrement stock for each item
+    for (const item of orderItems) {
+      operations.push(
+        prisma.product.update({
+          where: { id: item.productId },
+          data: {
+            stockQuantity: { decrement: item.quantity }
+          }
+        })
+      );
+    }
+
+    // 4. Execute transaction
+    const results = await prisma.$transaction(operations);
+    const order = results[0]; // The first operation returns the created order
 
     res.status(201).json(order);
   } catch (error) {

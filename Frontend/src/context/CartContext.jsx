@@ -139,6 +139,13 @@ export function CartProvider({ children }) {
   // Cart Operations
   // -------------------------------------------------------
   const addToCart = async (product, quantity = 1) => {
+    // Check stock limit
+    const existing = cartItems.find(p => p.id === product.id);
+    const currentQty = existing ? existing.quantity : 0;
+    if (currentQty + quantity > product.stockQuantity) {
+      alert(`Cannot add more than available stock (${product.stockQuantity} available).`);
+      return;
+    }
     if (isAuthenticated) {
       try {
         const item = await apiFetch('/cart', {
@@ -187,6 +194,12 @@ export function CartProvider({ children }) {
   const updateQuantity = async (productId, quantity) => {
     if (quantity <= 0) {
       removeFromCart(productId);
+      return;
+    }
+
+    const itemToUpdate = cartItems.find(item => item.id === productId);
+    if (itemToUpdate && quantity > itemToUpdate.stockQuantity) {
+      alert(`Cannot exceed available stock (${itemToUpdate.stockQuantity} available).`);
       return;
     }
     

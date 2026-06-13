@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
+import apiFetch from '../utils/api';
 import Breadcrumb from '../components/layout/Breadcrumb';
 import Button from '../components/ui/Button';
 import StarRating from '../components/ui/StarRating';
@@ -15,11 +17,18 @@ export default function ProductDetailsPage() {
   const { getProductById, products } = useProducts();
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { user } = useAuth();
   const navigate = useNavigate();
   
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
+  
+  const [reviews, setReviews] = useState([]);
+  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [newReviewComment, setNewReviewComment] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState('');
 
   // Find product
   const product = getProductById(id) || products[0];
@@ -32,6 +41,11 @@ export default function ProductDetailsPage() {
       if (product.sizes && product.sizes.length > 0) {
         setSelectedSize(product.sizes[0].size || product.sizes[0]);
       }
+      
+      // Fetch reviews
+      apiFetch(`/reviews/${product.id}`)
+        .then(data => setReviews(data))
+        .catch(err => console.error("Failed to load reviews", err));
     }
   }, [product]);
   const relatedProducts = product ? products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4) : [];
@@ -43,12 +57,13 @@ export default function ProductDetailsPage() {
   const handleQuantityChange = (type) => {
     if (type === 'dec' && quantity > 1) {
       setQuantity(quantity - 1);
-    } else if (type === 'inc') {
+    } else if (type === 'inc' && quantity < product.stockQuantity) {
       setQuantity(quantity + 1);
     }
   };
 
   const handleAddToCart = () => {
+    if (product.stockQuantity === 0) return;
     for (let i = 0; i < quantity; i++) {
       addToCart(product);
     }
@@ -64,6 +79,42 @@ export default function ProductDetailsPage() {
       removeFromWishlist(product.id);
     } else {
       addToWishlist(product);
+    }
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      alert("Please login to submit a review.");
+      navigate('/login');
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    setReviewError('');
+
+    try {
+      const data = await apiFetch(`/reviews/${product.id}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          rating: newReviewRating,
+          comment: newReviewComment
+        })
+      });
+
+      // Update local state with new review
+      setReviews([data.review, ...reviews]);
+      setNewReviewComment('');
+      setNewReviewRating(5);
+      
+      // Update the product context if we had a function for it, but 
+      // we'll just update local product object for immediate UI feedback
+      product.rating = data.productRating;
+      product.ratingCount = data.productRatingCount;
+    } catch (err) {
+      setReviewError(err.message || 'Failed to submit review');
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -107,7 +158,13 @@ export default function ProductDetailsPage() {
               <StarRating rating={product.rating} />
               <span className="product-info__reviews">({product.reviews} Reviews)</span>
               <span className="product-info__meta-divider">|</span>
-              <span className="product-info__stock">In Stock</span>
+              {product.stockQuantity === 0 ? (
+                <span className="product-info__stock" style={{ color: '#DB4444', fontWeight: 600 }}>Out of Stock</span>
+              ) : product.stockQuantity <= 3 ? (
+                <span className="product-info__stock" style={{ color: '#FFAD33', fontWeight: 600 }}>Only {product.stockQuantity} left in stock</span>
+              ) : (
+                <span className="product-info__stock" style={{ color: '#00FF66' }}>In Stock</span>
+              )}
             </div>
             
             <div className="product-info__price">${Number(product.price).toFixed(2)}</div>
@@ -168,7 +225,13 @@ export default function ProductDetailsPage() {
                 <button className="product-quantity__btn product-quantity__btn--plus" onClick={() => handleQuantityChange('inc')}>+</button>
               </div>
               
-              <Button onClick={handleBuyNow} className="product-actions__buy-btn">Buy Now</Button>
+              <Button 
+                onClick={handleBuyNow} 
+                className="product-actions__buy-btn"
+                disabled={product.stockQuantity === 0}
+              >
+                Buy Now
+              </Button>
               
               <button 
                 className={`product-actions__wishlist-btn ${isInWishlist(product.id) ? 'active' : ''}`}
@@ -203,6 +266,71 @@ export default function ProductDetailsPage() {
               </div>
             </div>
             
+          </div>
+        </div>
+        
+        {/* Reviews Section */}
+        <div className="product-reviews">
+          <h2 className="product-reviews__title">Reviews ({product.ratingCount || reviews.length})</h2>
+          
+          <div className="product-reviews__list">
+            {reviews.length === 0 ? (
+              <p>No reviews yet. Be the first to review this product!</p>
+            ) : (
+              reviews.map(review => (
+                <div key={review.id} className="review-card">
+                  <div className="review-card__header">
+                    <div className="review-card__user">
+                      {review.user?.firstName} {review.user?.lastName}
+                    </div>
+                    <div className="review-card__date">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <StarRating rating={review.rating} />
+                  {review.comment && (
+                    <p className="review-card__comment">{review.comment}</p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+          
+          <div className="review-form">
+            <h3 className="review-form__title">Write a Review</h3>
+            {reviewError && <p style={{color: 'var(--primary)', marginBottom: '16px'}}>{reviewError}</p>}
+            
+            <form onSubmit={handleReviewSubmit}>
+              <div className="review-form__rating">
+                <span className="review-form__rating-label">Your Rating:</span>
+                <div className="review-form__stars">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <svg 
+                      key={star} 
+                      width="24" height="24" viewBox="0 0 24 24" 
+                      fill={star <= newReviewRating ? "#FFAD33" : "none"} 
+                      stroke={star <= newReviewRating ? "#FFAD33" : "currentColor"} 
+                      strokeWidth="2"
+                      onClick={() => setNewReviewRating(star)}
+                    >
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
+              
+              <textarea 
+                className="review-form__textarea" 
+                placeholder="Share your thoughts about this product..."
+                value={newReviewComment}
+                onChange={(e) => setNewReviewComment(e.target.value)}
+                required
+              />
+              
+              <Button type="submit" disabled={isSubmittingReview}>
+                {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+              </Button>
+            </form>
           </div>
         </div>
         

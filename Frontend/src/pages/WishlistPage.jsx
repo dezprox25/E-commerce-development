@@ -16,10 +16,22 @@ export default function WishlistPage() {
   const navigate = useNavigate();
 
   const handleMoveAllToCart = () => {
+    let outOfStockCount = 0;
+    
     wishlistItems.forEach(item => {
-      addToCart(item);
-      removeFromWishlist(item.id);
+      if (item.stockQuantity === 0) {
+        outOfStockCount++;
+      } else {
+        addToCart(item);
+        removeFromWishlist(item.id);
+      }
     });
+
+    if (outOfStockCount > 0) {
+      alert(`${outOfStockCount} item(s) could not be moved because they are out of stock.`);
+    } else if (wishlistItems.length > 0) {
+      alert('All items moved to bag successfully!');
+    }
   };
 
   const justForYouProducts = useMemo(() => {

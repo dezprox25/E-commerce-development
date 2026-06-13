@@ -39,7 +39,7 @@ export default function NewArrivals() {
               <div className="bento-item__content">
                 <h3 className="bento-item__title">Women's Collections</h3>
                 <p className="bento-item__desc">Featured woman collections that give you another vibe.</p>
-                <Link to="/products" className="bento-item__link">Shop Now</Link>
+                <Link to="/category/womens-fashion" className="bento-item__link">Shop Now</Link>
               </div>
             </div>
             
@@ -55,7 +55,7 @@ export default function NewArrivals() {
                 <div className="bento-item__content">
                   <h3 className="bento-item__title">Speakers</h3>
                   <p className="bento-item__desc">Amazon wireless speakers</p>
-                  <Link to="/products" className="bento-item__link">Shop Now</Link>
+                  <Link to="/category/electronics" className="bento-item__link">Shop Now</Link>
                 </div>
               </div>
               
@@ -69,7 +69,7 @@ export default function NewArrivals() {
                 <div className="bento-item__content">
                   <h3 className="bento-item__title">Perfume</h3>
                   <p className="bento-item__desc">GUCCI INTENSE OUD EDP</p>
-                  <Link to="/products" className="bento-item__link">Shop Now</Link>
+                  <Link to="/category/health-beauty" className="bento-item__link">Shop Now</Link>
                 </div>
               </div>
             </div>

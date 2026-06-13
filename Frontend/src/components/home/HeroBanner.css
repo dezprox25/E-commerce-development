@@ -58,6 +58,23 @@
   padding: 0 64px;
   position: relative;
   overflow: hidden;
+  transition: background-color 0.5s ease;
+}
+
+/* Fade-in animation for slide content */
+.hero-banner__fade-in {
+  animation: heroFadeIn 0.6s ease-out both;
+}
+
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero-banner__content {

@@ -19,11 +19,7 @@ export default function ExplorePage() {
 
   // Filter products by category if one is selected
   const categoryProducts = activeCategory 
-    ? products.filter(p => 
-        p.category.toLowerCase() === activeCategory.toLowerCase() || 
-        p.category.toLowerCase() === activeCategory.replace('-', ' ').toLowerCase() ||
-        p.category.toLowerCase().includes(activeCategory.toLowerCase())
-      )
+    ? products.filter(p => p.category === activeCategory)
     : products;
 
   // Pagination logic
@@ -37,11 +33,15 @@ export default function ExplorePage() {
     window.scrollTo({ top: 300, behavior: 'smooth' }); // Scroll back to grid start
   };
 
-  const handleCategorySelect = (categoryId) => {
+  const handleCategorySelect = (categorySlug) => {
     // If clicking same category, deselect it (show all)
-    setActiveCategory(prev => prev === categoryId ? null : categoryId);
+    setActiveCategory(prev => prev === categorySlug ? null : categorySlug);
     setCurrentPage(1); // Reset pagination on filter change
   };
+
+  // Find the active category name for the title
+  const activeCategoryObj = categories.find(c => c.slug === activeCategory);
+  const activeCategoryName = activeCategoryObj ? activeCategoryObj.name : null;
 
   return (
     <div className="page-wrapper explore-page">
@@ -58,13 +58,13 @@ export default function ExplorePage() {
             {categories.map(category => (
               <div 
                 key={category.id} 
-                onClick={() => handleCategorySelect(category.name.toLowerCase())}
+                onClick={() => handleCategorySelect(category.slug)}
                 style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center' }}
               >
                 <CategoryCard 
                   icon={category.icon} 
                   name={category.name} 
-                  isActive={activeCategory === category.name.toLowerCase()}
+                  isActive={activeCategory === category.slug}
                 />
               </div>
             ))}
@@ -76,7 +76,7 @@ export default function ExplorePage() {
         {/* Product Grid Section */}
         <div className="explore-page__products">
           <h2 className="explore-page__products-title">
-            {activeCategory ? `${activeCategory.replace('-', ' ')} Products` : 'All Products'}
+            {activeCategoryName ? `${activeCategoryName} Products` : 'All Products'}
           </h2>
 
           {categoryProducts.length === 0 ? (

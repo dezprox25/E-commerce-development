@@ -6,7 +6,8 @@ export default function Breadcrumb({ items }) {
 
   const defaultItems = location.pathname.split('/').filter(Boolean).map((segment, index, arr) => ({
     label: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '),
-    path: '/' + arr.slice(0, index + 1).join('/'),
+    // Route /category alone back to homepage since there's no standalone category page
+    path: segment.toLowerCase() === 'category' ? '/' : '/' + arr.slice(0, index + 1).join('/'),
   }));
 
   const breadcrumbItems = items || defaultItems;

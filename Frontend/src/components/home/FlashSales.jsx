@@ -22,10 +22,6 @@ export default function FlashSales() {
     }
   };
 
-  // Target date is set a few days in the future for demo
-  const targetDate = new Date();
-  targetDate.setDate(targetDate.getDate() + 3);
-
   // Use backend products with a discount
   const flashSaleProducts = products.filter(p => p.discount > 0);
   const displayProducts = flashSaleProducts.length > 0 ? flashSaleProducts : products.slice(0, 4);
@@ -39,7 +35,7 @@ export default function FlashSales() {
           rightContent={
             <>
               <div className="flash-sales__timer-wrapper">
-                <CountdownTimer targetDate={targetDate} />
+                <CountdownTimer storageKey="flash-sale-timer" durationDays={3} />
               </div>
               <ArrowButtons 
                 onPrev={() => scroll('left')} 

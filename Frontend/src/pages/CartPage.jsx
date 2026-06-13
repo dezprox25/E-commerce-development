@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Breadcrumb from '../components/layout/Breadcrumb';
 import Button from '../components/ui/Button';
@@ -6,6 +6,22 @@ import './CartPage.css';
 
 export default function CartPage() {
   const { cartItems, updateQuantity, cartTotal } = useCart();
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    // Validate stock
+    for (const item of cartItems) {
+      if (item.quantity > item.stockQuantity) {
+        alert(`Cannot checkout. Your cart has ${item.quantity} of ${item.name}, but only ${item.stockQuantity} are available in stock.`);
+        return;
+      }
+      if (item.stockQuantity === 0) {
+        alert(`Cannot checkout. ${item.name} is currently out of stock.`);
+        return;
+      }
+    }
+    navigate('/checkout');
+  };
 
   return (
     <div className="cart-page">
@@ -47,8 +63,17 @@ export default function CartPage() {
                         type="number" 
                         className="cart-table__qty-input"
                         min="1"
+                        max={item.stockQuantity}
                         value={item.quantity}
-                        onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 1;
+                          if (val > item.stockQuantity) {
+                            alert(`Only ${item.stockQuantity} available.`);
+                            updateQuantity(item.id, item.stockQuantity);
+                          } else {
+                            updateQuantity(item.id, val);
+                          }
+                        }}
                       />
                     </div>
                     <div className="cart-table__col">${(item.price * item.quantity).toFixed(2)}</div>
@@ -88,9 +113,7 @@ export default function CartPage() {
               </div>
               
               <div className="cart-page__checkout-btn">
-                <Link to="/checkout">
-                  <Button fullWidth>Proceed to checkout</Button>
-                </Link>
+                <Button fullWidth onClick={handleCheckout}>Proceed to checkout</Button>
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import StarRating from './StarRating';
@@ -14,13 +14,14 @@ export default function ProductCard({
 }) {
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const navigate = useNavigate();
   const wishlisted = isInWishlist(product.id);
 
   return (
     <div className={`product-card ${compact ? 'product-card--compact' : ''}`}>
       {/* Image Area */}
       <div className="product-card__image-wrapper">
-        <div className="product-card__image">
+        <Link to={`/product/${product.id}`} className="product-card__image" style={{ display: 'block', height: '100%' }}>
           {/* Placeholder for product image */}
           <div className="product-card__image-placeholder">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1">
@@ -29,7 +30,7 @@ export default function ProductCard({
               <polyline points="21 15 16 10 5 21"/>
             </svg>
           </div>
-        </div>
+        </Link>
 
         {/* Badges */}
         <div className="product-card__badges">
@@ -58,15 +59,20 @@ export default function ProductCard({
               </svg>
             </button>
           )}
-          <button className="product-card__action-btn" title="Quick View">
+          <button className="product-card__action-btn" title="Quick View" onClick={() => navigate(`/product/${product.id}`)}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
 
         {/* Add to Cart Overlay */}
-        {showAddToCart && (
+        {showAddToCart && product.stockQuantity > 0 && (
           <button className="product-card__add-to-cart" onClick={() => addToCart(product)}>
             Add To Cart
+          </button>
+        )}
+        {showAddToCart && product.stockQuantity === 0 && (
+          <button className="product-card__add-to-cart" style={{ backgroundColor: '#666', cursor: 'not-allowed' }} disabled>
+            Out of Stock
           </button>
         )}
       </div>

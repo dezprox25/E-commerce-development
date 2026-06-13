@@ -1,7 +1,26 @@
 import { useState, useEffect } from 'react';
 import './CountdownTimer.css';
 
-export default function CountdownTimer({ targetDate, variant = 'standard' }) {
+export default function CountdownTimer({ targetDate, variant = 'standard', storageKey, durationDays = 3 }) {
+  const [target, setTarget] = useState(() => {
+    if (targetDate && !storageKey) return targetDate;
+    
+    if (storageKey) {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const date = new Date(saved);
+        if (date > new Date()) return date; // Still valid
+      }
+      // Need a new target date
+      const newDate = new Date();
+      newDate.setDate(newDate.getDate() + durationDays);
+      localStorage.setItem(storageKey, newDate.toISOString());
+      return newDate;
+    }
+    
+    return new Date();
+  });
+
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -11,7 +30,7 @@ export default function CountdownTimer({ targetDate, variant = 'standard' }) {
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const difference = +new Date(targetDate) - +new Date();
+      const difference = +new Date(target) - +new Date();
       let timeLeft = {};
 
       if (difference > 0) {
@@ -21,6 +40,12 @@ export default function CountdownTimer({ targetDate, variant = 'standard' }) {
           minutes: Math.floor((difference / 1000 / 60) % 60),
           seconds: Math.floor((difference / 1000) % 60)
         };
+      } else if (storageKey) {
+        // Expired and we have a storageKey, so auto-reset
+        const newDate = new Date();
+        newDate.setDate(newDate.getDate() + durationDays);
+        localStorage.setItem(storageKey, newDate.toISOString());
+        setTarget(newDate);
       }
       return timeLeft;
     };
@@ -31,7 +56,7 @@ export default function CountdownTimer({ targetDate, variant = 'standard' }) {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [targetDate]);
+  }, [target, storageKey, durationDays]);
 
   const pad = (num) => String(num).padStart(2, '0');
 

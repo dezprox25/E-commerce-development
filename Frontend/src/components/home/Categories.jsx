@@ -36,7 +36,7 @@ export default function Categories() {
         
         <div className="categories__list" ref={scrollRef}>
           {categories.map(category => (
-            <Link to={`/category/${category.name.toLowerCase()}`} key={category.id} style={{ textDecoration: 'none' }}>
+            <Link to={`/category/${category.slug}`} key={category.id} style={{ textDecoration: 'none' }}>
               <CategoryCard 
                 icon={category.icon} 
                 name={category.name} 

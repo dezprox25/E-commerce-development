@@ -26,6 +26,7 @@ model User {
   orders        Order[]
   cartItems     CartItem[]
   wishlistItems WishlistItem[]
+  reviews       Review[]
 }
 
 enum Role {
@@ -42,6 +43,7 @@ model Product {
   discount      Int      @default(0)
   rating        Decimal  @default(0) @db.Decimal(3, 2)
   ratingCount   Int      @default(0)
+  stockQuantity Int      @default(0)
   category      String
   isNew         Boolean  @default(false)
   imageUrl      String?
@@ -53,6 +55,7 @@ model Product {
   wishlistItems WishlistItem[]
   colors        ProductColor[]
   sizes         ProductSize[]
+  reviews       Review[]
 }
 
 model ProductColor {
@@ -126,4 +129,16 @@ model WishlistItem {
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating    Int      @default(5)
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

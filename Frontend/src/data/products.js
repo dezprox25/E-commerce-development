@@ -290,24 +290,28 @@ export const products = [
 ];
 
 export const categories = [
-  { id: 1, name: "Phones", icon: "phone" },
-  { id: 2, name: "Computers", icon: "computer" },
-  { id: 3, name: "SmartWatch", icon: "smartwatch" },
-  { id: 4, name: "Camera", icon: "camera" },
-  { id: 5, name: "HeadPhones", icon: "headphone" },
-  { id: 6, name: "Gaming", icon: "gamepad" },
+  { id: 1, name: "Electronics", icon: "computer", slug: "electronics" },
+  { id: 2, name: "Gaming", icon: "gamepad", slug: "gaming" },
+  { id: 3, name: "Woman's Fashion", icon: "woman", slug: "womens-fashion" },
+  { id: 4, name: "Men's Fashion", icon: "man", slug: "mens-fashion" },
+  { id: 5, name: "Home & Lifestyle", icon: "home", slug: "home-lifestyle" },
+  { id: 6, name: "Medicine", icon: "medicine", slug: "medicine" },
+  { id: 7, name: "Sports & Outdoor", icon: "sports", slug: "sports-outdoor" },
+  { id: 8, name: "Baby's & Toys", icon: "toys", slug: "toys" },
+  { id: 9, name: "Groceries & Pets", icon: "groceries", slug: "groceries" },
+  { id: 10, name: "Health & Beauty", icon: "health", slug: "health-beauty" },
 ];
 
 export const sidebarCategories = [
-  { name: "Woman's Fashion", hasDropdown: true },
-  { name: "Men's Fashion", hasDropdown: true },
-  { name: "Electronics", hasDropdown: false },
-  { name: "Home & Lifestyle", hasDropdown: false },
-  { name: "Medicine", hasDropdown: false },
-  { name: "Sports & Outdoor", hasDropdown: false },
-  { name: "Baby's & Toys", hasDropdown: false },
-  { name: "Groceries & Pets", hasDropdown: false },
-  { name: "Health & Beauty", hasDropdown: false },
+  { name: "Woman's Fashion", hasDropdown: true, slug: "womens-fashion" },
+  { name: "Men's Fashion", hasDropdown: true, slug: "mens-fashion" },
+  { name: "Electronics", hasDropdown: false, slug: "electronics" },
+  { name: "Home & Lifestyle", hasDropdown: false, slug: "home-lifestyle" },
+  { name: "Medicine", hasDropdown: false, slug: "medicine" },
+  { name: "Sports & Outdoor", hasDropdown: false, slug: "sports-outdoor" },
+  { name: "Baby's & Toys", hasDropdown: false, slug: "toys" },
+  { name: "Groceries & Pets", hasDropdown: false, slug: "groceries" },
+  { name: "Health & Beauty", hasDropdown: false, slug: "health-beauty" },
 ];
 
 export const flashSaleProducts = products.filter((p) => p.discount > 0);
